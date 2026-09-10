@@ -1,19 +1,18 @@
-const moment = require("moment")
-const express = require("express")
+const express = require('express')
 
-const HOST = "localhost"
+const HOST = 'localhost'
 const PORT = 8000
 
 const app = express()
 
-app.get("/timestamp", (req, res) => {
-    const now = moment().format('YYYY-MM-DD HH:mm:ss');
+app.get('/', (req, res) => {
+    res.status(200).json("Hello World")
+})
 
-    res.status(200).json({
-        date: now
-    })
+app.get('/Bohdan', (req, res) => {
+    res.status(200).json("Bohdan Novikov")
 })
 
 app.listen(PORT, HOST, () => {
-    console.log("Running")
+    console.log(`Listening on http://${HOST}:${PORT}`)
 })
