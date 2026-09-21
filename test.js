@@ -5,6 +5,8 @@ const PORT = 8000
 
 const app = express()
 
+app.use(express.json())
+
 let products = [
     {
         id: 0,
@@ -31,6 +33,27 @@ let products = [
         category: 'electronics'
     }
 ]
+
+function addProduct(newProduct, fail = false) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (fail) {
+                return reject(new Error(`Can't add product`))
+            }
+
+            const createdProduct = {
+                id: products.length + 1,
+                name: newProduct.name,
+                price: newProduct.price,
+                category: newProduct.category,
+            }
+
+            products.push(createdProduct)
+            resolve(createdProduct)
+        }, 0)
+    })
+}
+
 
 app.get('/', (req, res) => {
     res.status(200).json("Hello World")
@@ -61,6 +84,32 @@ app.get('/products', (req, res) => {
     }
     selectedProducts = selectedProducts.slice(0, takeNumber)
     return res.status(200).json(selectedProducts)
+})
+
+app.post('/products', async (req, res) => {
+    const { name, price, category } = req.body
+    const fail = req.query.fail === 'true'
+
+    if (typeof name !== "string" || typeof category !== "string" || !Number.isInteger(price) || price <= 0) {
+        return res.status(422).json("Validation error")
+    }
+
+    const isDuplicate = products.find(product => product.name === name)
+    if (isDuplicate) {
+        return res.status(409).json("Product already exists")
+    }
+
+    try {
+        const newProduct = await addProduct({
+            name: name,
+            price,
+            category: category
+        }, fail)
+        return res.status(201).json(newProduct)
+    }
+    catch (error) {
+        return res.status(500).json(error.message)
+    }
 })
 
 app.get('/products/:id', (req, res) => {
